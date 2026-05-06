@@ -1,0 +1,25 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# Terraform state and local configs (never commit sensitive data)
+# ────────────────────────────────────────────────────────────────────────────────
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/plan.tfplan
+**/full.plan
+**/*.log
+**/apply.log
+**/plan.log
+
+# Backend and variable files with real values
+**/backend.tfvars
+**/dev.tfvars
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+
+# Docs folder (local only)
+docs/

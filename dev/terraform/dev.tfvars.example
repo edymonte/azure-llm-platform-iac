@@ -1,0 +1,111 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# dev.tfvars.example
+# Copy to dev.tfvars and fill in your values
+# NEVER commit dev.tfvars — it contains subscription-specific data
+# ────────────────────────────────────────────────────────────────────────────────
+
+project_name = "azllm"
+environment  = "dev"
+
+primary_location    = "East US"
+resource_group_name = "rg-azllm-foundry-dev"
+
+regions = {
+  eastus = {
+    location      = "East US"
+    location_code = "eus"
+    enabled       = true
+  }
+  westus3 = {
+    location      = "West US 3"
+    location_code = "wus3"
+    enabled       = true
+  }
+}
+
+foundry_models_config = {
+  deployment_name = "gpt-4o"
+  model_name      = "gpt-4o"
+  model_format    = "OpenAI"
+  model_version   = "2024-11-20"
+  sku_name        = "GlobalStandard"
+  capacity        = 150
+}
+
+quota_limits = {
+  gpt_4o_quota = 150
+}
+
+vnet_address_space             = ["10.20.0.0/16"]
+workload_subnet_prefix         = "10.20.0.0/23"
+private_endpoint_subnet_prefix = "10.20.2.0/23"
+ai_services_subnet_prefix      = "10.20.4.0/23"
+container_apps_subnet_prefix   = "10.20.6.0/23"
+
+enable_cae_internal_only        = true
+enable_litellm_external_ingress = false
+allowed_test_cidrs              = []
+prisma_cloud_cidrs              = []
+
+key_vault_name = "kv-azllm-fnd-dev"
+key_vault_sku  = "standard"
+
+resolve_latest_model_version      = true
+enable_soft_deleted_account_purge = true
+
+container_apps_config = {
+  enabled            = true
+  container_env_name = "cae-azllm-dev"
+  acr_login_server   = ""
+  acr_resource_id    = ""
+  litellm_config_yaml = ""
+  llm_app = {
+    image            = "ghcr.io/berriai/litellm:main-latest"
+    name             = "ca-llm-azllm-dev"
+    image_repository = ""
+    image_tag        = ""
+    target_port      = 4000
+    cpu              = 1
+    memory           = "2Gi"
+    min_replicas     = 1
+    max_replicas     = 2
+    external_ingress = false
+    command          = ["/bin/sh", "-c"]
+    args             = ["echo \"$LITELLM_CONFIG_B64\" | base64 -d > /tmp/config.yaml && litellm --config /tmp/config.yaml --host 0.0.0.0 --port 4000"]
+    env              = {}
+  }
+  test_app = {
+    image            = "curlimages/curl:8.7.1"
+    name             = "ca-test-azllm-dev"
+    image_repository = ""
+    image_tag        = ""
+    cpu              = 0.5
+    memory           = "1Gi"
+    min_replicas     = 1
+    max_replicas     = 1
+    command          = ["/bin/sh", "-c"]
+    args             = ["while true; do ts=$(date -u +%Y%m%dT%H%M%SZ); out=\"/tmp/gpt4o-$ts.json\"; curl -sS -X POST \"$${LITELLM_BASE_URL}/v1/chat/completions\" -H \"Content-Type: application/json\" -d '{\"model\":\"gpt-4o\",\"messages\":[{\"role\":\"user\",\"content\":\"health check\"}]}' -o \"$out\"; echo \"Saved $out\"; sleep 300; done"]
+    env              = {}
+  }
+  val_app = {
+    image            = "python:3.12-slim"
+    name             = "ca-val-azllm-dev"
+    image_repository = ""
+    image_tag        = ""
+    cpu              = 0.5
+    memory           = "1Gi"
+    min_replicas     = 0
+    max_replicas     = 1
+    command          = ["/bin/sh", "-c"]
+    args             = ["pip install openai && python -c \"import openai; print('validation ok')\""]
+    env              = {}
+  }
+}
+
+tags = {
+  environment = "dev"
+  project     = "azure-llm-platform"
+  managed_by  = "terraform"
+  workload    = "ai-foundry"
+  cost_center = "ai-infrastructure"
+}

@@ -1,0 +1,56 @@
+name: Terraform CI (Self-Hosted)
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Azure Login with VM Managed Identity
+        shell: bash
+        run: |
+          az login --identity
+          az account show
+
+      - name: Terraform Fmt Check
+        shell: bash
+        run: |
+          terraform fmt -check -recursive
+
+      - name: Validate Backend Stack
+        shell: bash
+        working-directory: dev/backend-storage
+        run: |
+          terraform init -input=false
+          terraform validate
+
+      - name: Validate Main Stack
+        shell: bash
+        working-directory: dev/terraform
+        run: |
+          terraform init -input=false -backend=false
+          terraform validate
+
+      - name: Optional Plan (when tfvars provided)
+        if: ${{ hashFiles('dev/terraform/dev.tfvars') != '' }}
+        shell: bash
+        working-directory: dev/terraform
+        run: |
+          terraform plan -input=false -var-file=dev.tfvars -lock=false
