@@ -12,7 +12,9 @@ permissions:
 
 jobs:
   validate:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
     steps:
       - name: Checkout
@@ -27,6 +29,9 @@ jobs:
         shell: bash
         run: |
           az login --identity
+          if [[ -n "${AZURE_SUBSCRIPTION_ID:-}" ]]; then
+            az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+          fi
           az account show
 
       - name: Terraform Fmt Check
