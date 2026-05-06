@@ -1,5 +1,10 @@
 name: Terraform CI (Self-Hosted)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Runner: self-hosted Azure VM (Linux/x64) with System Assigned Managed Identity
+# Auth  : az login --identity  (no Service Principal or secrets required)
+# ─────────────────────────────────────────────────────────────────────────────
+
 on:
   pull_request:
     branches: [ "main" ]
@@ -30,14 +35,14 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-      - name: Azure Login with VM Managed Identity
+      - name: Azure Login via Managed Identity
         shell: bash
         run: |
           az login --identity
           if [[ -n "${AZURE_SUBSCRIPTION_ID:-}" ]]; then
             az account set --subscription "$AZURE_SUBSCRIPTION_ID"
           fi
-          az account show
+          az account show --output table
 
       - name: Terraform Fmt Check
         shell: bash
@@ -81,14 +86,14 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-      - name: Azure Login with VM Managed Identity
+      - name: Azure Login via Managed Identity
         shell: bash
         run: |
           az login --identity
           if [[ -n "${AZURE_SUBSCRIPTION_ID:-}" ]]; then
             az account set --subscription "$AZURE_SUBSCRIPTION_ID"
           fi
-          az account show
+          az account show --output table
 
       - name: Ensure required tfvars exist
         shell: bash
