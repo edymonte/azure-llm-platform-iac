@@ -3,15 +3,20 @@ name: Terraform CI (Self-Hosted)
 on:
   pull_request:
     branches: [ "main" ]
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      run_apply:
+        description: "Run terraform apply (requires protected environment approval)"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  validate_and_plan_pr:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: [self-hosted, linux, x64]
     env:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
@@ -53,9 +58,49 @@ jobs:
           terraform init -input=false -backend=false
           terraform validate
 
-      - name: Optional Plan (when tfvars provided)
+      - name: Optional Plan (when dev.tfvars is available)
         if: ${{ hashFiles('dev/terraform/dev.tfvars') != '' }}
         shell: bash
         working-directory: dev/terraform
         run: |
           terraform plan -input=false -var-file=dev.tfvars -lock=false
+
+  apply_manual:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_apply == true }}
+    runs-on: [self-hosted, linux, x64]
+    environment: production
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Azure Login with VM Managed Identity
+        shell: bash
+        run: |
+          az login --identity
+          if [[ -n "${AZURE_SUBSCRIPTION_ID:-}" ]]; then
+            az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+          fi
+          az account show
+
+      - name: Ensure required tfvars exist
+        shell: bash
+        run: |
+          test -f dev/terraform/backend.tfvars || { echo "Missing dev/terraform/backend.tfvars"; exit 1; }
+          test -f dev/terraform/dev.tfvars || { echo "Missing dev/terraform/dev.tfvars"; exit 1; }
+
+      - name: Terraform Init/Validate/Plan/Apply
+        shell: bash
+        working-directory: dev/terraform
+        run: |
+          terraform init -input=false -reconfigure -backend-config=backend.tfvars
+          terraform validate
+          terraform plan -input=false -var-file=dev.tfvars -out=plan.tfplan
+          terraform apply -input=false -auto-approve plan.tfplan
