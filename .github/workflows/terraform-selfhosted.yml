@@ -129,6 +129,23 @@ jobs:
           fi
           az account show --output table
 
+      - name: Materialize tfvars from secrets
+        shell: bash
+        working-directory: dev/terraform
+        env:
+          BACKEND_TFVARS: ${{ secrets.BACKEND_TFVARS }}
+          DEV_TFVARS: ${{ secrets.DEV_TFVARS }}
+        run: |
+          set -e
+          if [[ -z "${BACKEND_TFVARS:-}" || -z "${DEV_TFVARS:-}" ]]; then
+            echo "::error::Missing repository secrets BACKEND_TFVARS and/or DEV_TFVARS"
+            exit 1
+          fi
+          printf '%s\n' "$BACKEND_TFVARS" > backend.tfvars
+          printf '%s\n' "$DEV_TFVARS"     > dev.tfvars
+          chmod 600 backend.tfvars dev.tfvars
+          echo "Materialized backend.tfvars ($(wc -l < backend.tfvars) lines) and dev.tfvars ($(wc -l < dev.tfvars) lines)"
+
       - name: Ensure required tfvars exist
         shell: bash
         run: |
