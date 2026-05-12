@@ -30,6 +30,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Runner preflight (required tools)
+        shell: bash
+        run: |
+          set -e
+          missing=()
+          for tool in unzip curl jq az git bash; do
+            if ! command -v "$tool" >/dev/null 2>&1; then
+              missing+=("$tool")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing required tools on self-hosted runner: ${missing[*]}"
+            echo "Install on Debian/Ubuntu: sudo apt-get update && sudo apt-get install -y ${missing[*]}"
+            exit 1
+          fi
+          echo "All required tools present."
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -80,6 +97,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Runner preflight (required tools)
+        shell: bash
+        run: |
+          set -e
+          missing=()
+          for tool in unzip curl jq az git bash; do
+            if ! command -v "$tool" >/dev/null 2>&1; then
+              missing+=("$tool")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing required tools on self-hosted runner: ${missing[*]}"
+            echo "Install on Debian/Ubuntu: sudo apt-get update && sudo apt-get install -y ${missing[*]}"
+            exit 1
+          fi
+          echo "All required tools present."
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

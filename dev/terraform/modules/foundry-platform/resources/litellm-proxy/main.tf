@@ -81,7 +81,7 @@ resource "azurerm_container_app_environment" "this" {
 }
 
 locals {
-  llm_image = trim(var.llm_app.image) != "" ? var.llm_app.image : "ghcr.io/berriai/litellm:main-latest"
+  llm_image = trimspace(var.llm_app.image) != "" ? var.llm_app.image : "ghcr.io/berriai/litellm:main-latest"
 }
 
 resource "azurerm_container_app" "llm" {

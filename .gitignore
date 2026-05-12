@@ -6,6 +6,7 @@
 **/*.tfstate.*
 **/*.tfplan
 **/plan.tfplan
+**/*.plan
 **/full.plan
 **/*.log
 **/apply.log
@@ -23,3 +24,6 @@ Thumbs.db
 
 # Docs folder (local only)
 docs/
+
+# Local-only project memory (assistant retomada)
+claude.md
