@@ -25,6 +25,10 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     env:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # Tell AzureRM/AzAPI providers to authenticate via the runner's Managed Identity
+      ARM_USE_MSI: "true"
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
 
     steps:
       - name: Checkout
@@ -93,6 +97,10 @@ jobs:
     environment: production
     env:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # Tell AzureRM/AzAPI providers to authenticate via the runner's Managed Identity
+      ARM_USE_MSI: "true"
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
 
     steps:
       - name: Checkout
