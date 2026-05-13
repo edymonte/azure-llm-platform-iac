@@ -121,10 +121,11 @@ resource "azapi_resource" "foundry" {
     }
     properties = {
       customSubDomainName = each.value.custom_subdomain
-      publicNetworkAccess = "Disabled"
+      publicNetworkAccess = length(var.prisma_cloud_cidrs) > 0 ? "Enabled" : "Disabled"
       networkAcls = {
         defaultAction = "Deny"
         bypass        = "AzureServices"
+        ipRules       = [for cidr in var.prisma_cloud_cidrs : { value = cidr }]
       }
     }
   }
