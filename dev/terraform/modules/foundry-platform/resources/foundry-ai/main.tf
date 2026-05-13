@@ -91,6 +91,7 @@ resource "azurerm_key_vault" "foundry" {
   sku_name                   = var.key_vault_sku
   purge_protection_enabled   = false
   soft_delete_retention_days = 7
+  enable_rbac_authorization  = true
 
   network_acls {
     default_action = "Deny"
