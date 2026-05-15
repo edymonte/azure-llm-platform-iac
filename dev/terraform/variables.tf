@@ -36,6 +36,10 @@ variable "regions" {
     location      = string
     location_code = string
     enabled       = bool
+    # Cota de tokens por minuto (TPM) em unidades de 1000 para esta região.
+    # Sobrescreve foundry_models_config.capacity quando definido.
+    # Ex: 150 = 150.000 TPM (GlobalStandard gpt-4o)
+    capacity      = optional(number)
   }))
 
   default = {
@@ -43,11 +47,13 @@ variable "regions" {
       location      = "East US"
       location_code = "eus"
       enabled       = true
+      capacity      = 150
     }
     westus3 = {
       location      = "West US 3"
       location_code = "wus3"
       enabled       = true
+      capacity      = 150
     }
   }
 }

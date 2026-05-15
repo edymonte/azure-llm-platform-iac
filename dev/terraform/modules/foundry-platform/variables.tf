@@ -28,6 +28,7 @@ variable "regions" {
     location      = string
     location_code = string
     enabled       = bool
+    capacity      = optional(number)
   }))
 }
 

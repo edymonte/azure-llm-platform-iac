@@ -12,6 +12,7 @@ variable "regions" {
     location      = string
     location_code = string
     enabled       = bool
+    capacity      = optional(number)
   }))
 }
 variable "foundry_models_config" {
@@ -66,6 +67,8 @@ locals {
       location         = region.location
       code             = region.location_code
       custom_subdomain = "api-${replace(var.naming_prefix, "-", "")}-${region.location_code}-01"
+      # Usa capacity da região se definido; caso contrário, usa o valor global de foundry_models_config
+      capacity         = coalesce(region.capacity, var.foundry_models_config.capacity)
     } if region.enabled
   }
 }
@@ -149,7 +152,7 @@ resource "azapi_resource" "global_standard" {
   body = {
     sku = {
       name     = var.foundry_models_config.sku_name
-      capacity = var.foundry_models_config.capacity
+      capacity = each.value.capacity
     }
     properties = {
       model = {

@@ -15,11 +15,13 @@ regions = {
     location      = "East US"
     location_code = "eus"
     enabled       = true
+    capacity      = 150  # TPM em unidades de 1000 (150 = 150k TPM)
   }
   westus3 = {
     location      = "West US 3"
     location_code = "wus3"
     enabled       = true
+    capacity      = 150
   }
 }
 
