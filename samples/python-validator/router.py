@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 """
-Azure AI Foundry — Smart Router com auto-failover por região.
+Azure AI Foundry - Smart Router com auto-failover por regiao.
 
 Funcionalidades:
   - Valida todos os endpoints antes de iniciar (health check)
@@ -22,9 +23,16 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import io
 import os
 import sys
 import time
+
+# Garante UTF-8 no stdout/stderr mesmo em terminais Windows (cp1252)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Iterator
@@ -95,7 +103,7 @@ class Region:
 class CallResult:
     region: str
     ok: bool
-    content: str
+    content: str         = ""
     prompt_tokens: int   = 0
     completion_tokens: int = 0
     latency_ms: float    = 0.0
@@ -171,10 +179,10 @@ class FoundryRouter:
     def status(self) -> None:
         """Imprime o status atual de cada região."""
         now = time.time()
-        print("\n── Status das regiões ──")
+        print("\n--- Status das regioes ---")
         for r in self._regions:
             if r.available:
-                state = "disponível"
+                state = "disponivel"
             else:
                 wait = r.available_after - now
                 state = f"cooldown {wait:.0f}s restantes"
@@ -305,7 +313,7 @@ def _print_result(result: CallResult) -> None:
 
 
 def _run_validate(router: FoundryRouter) -> int:
-    print("\n── Health check ──")
+    print("\n--- Health check ---")
     results = router.validate()
     ok_count = 0
     for r in results:
@@ -313,13 +321,13 @@ def _run_validate(router: FoundryRouter) -> int:
         if r.ok:
             ok_count += 1
             print(
-                f"  [{flag}] {r.region:8s} → {r.content!r}  "
+                f"  [{flag}] {r.region:8s} -> {r.content!r}  "
                 f"({r.latency_ms:.0f}ms | in={r.prompt_tokens} out={r.completion_tokens})"
             )
         else:
-            print(f"  [{flag}] {r.region:8s} → {r.error}")
+            print(f"  [{flag}] {r.region:8s} -> {r.error}")
 
-    print(f"\n{ok_count}/{len(results)} regiões saudáveis.")
+    print(f"\n{ok_count}/{len(results)} regioes saudaveis.")
     return 0 if ok_count > 0 else 1
 
 
@@ -335,7 +343,7 @@ def _run_single_prompt(router: FoundryRouter, prompt: str) -> int:
 
 def _run_interactive(router: FoundryRouter) -> int:
     """Loop interativo de chat com histórico e failover transparente."""
-    print("\n── Chat interativo (Ctrl+C ou 'sair' para encerrar) ──")
+    print("\n--- Chat interativo (Ctrl+C ou 'sair' para encerrar) ---")
     print("   Comandos especiais: /status  /limpar  /regioes  /sair\n")
 
     history: list[ChatCompletionMessageParam] = []
