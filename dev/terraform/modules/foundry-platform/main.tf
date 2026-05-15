@@ -73,6 +73,8 @@ module "foundry_ai" {
   naming_prefix      = "${var.project_name}-${var.environment}"
   prisma_cloud_cidrs = var.prisma_cloud_cidrs
 
+  enable_public_network_access = var.enable_public_network_access
+
   resolve_latest_model_version      = var.resolve_latest_model_version
   enable_soft_deleted_account_purge = var.enable_soft_deleted_account_purge
 

@@ -167,3 +167,8 @@ variable "prisma_cloud_cidrs" {
   type    = list(string)
   default = []
 }
+
+variable "enable_public_network_access" {
+  type    = bool
+  default = true
+}

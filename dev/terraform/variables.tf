@@ -142,6 +142,12 @@ variable "prisma_cloud_cidrs" {
   default     = []
 }
 
+variable "enable_public_network_access" {
+  description = "Whether to enable public network access on Foundry accounts and Storage Account"
+  type        = bool
+  default     = true
+}
+
 # ────────────────────────────────────────────────────────────────────────────────
 # QUOTA LIMITS
 # ────────────────────────────────────────────────────────────────────────────────

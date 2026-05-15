@@ -30,6 +30,7 @@ module "foundry_platform" {
   allowed_test_cidrs              = var.allowed_test_cidrs
   enable_litellm_external_ingress = var.enable_litellm_external_ingress
   prisma_cloud_cidrs              = var.prisma_cloud_cidrs
+  enable_public_network_access    = var.enable_public_network_access
 
   # Quota
   quota_limits = var.quota_limits

@@ -51,6 +51,11 @@ variable "prisma_cloud_cidrs" {
   default = []
 }
 
+variable "enable_public_network_access" {
+  type    = bool
+  default = true
+}
+
 data "azurerm_client_config" "current" {}
 data "azurerm_resource_group" "main" { name = var.resource_group_name }
 
@@ -72,7 +77,7 @@ resource "azurerm_storage_account" "foundry" {
   account_tier                  = "Standard"
   account_replication_type      = "LRS"
   https_traffic_only_enabled    = true
-  public_network_access_enabled = length(var.prisma_cloud_cidrs) > 0
+  public_network_access_enabled = var.enable_public_network_access
 
   network_rules {
     default_action = "Deny"
@@ -121,7 +126,7 @@ resource "azapi_resource" "foundry" {
     }
     properties = {
       customSubDomainName = each.value.custom_subdomain
-      publicNetworkAccess = length(var.prisma_cloud_cidrs) > 0 ? "Enabled" : "Disabled"
+      publicNetworkAccess = var.enable_public_network_access ? "Enabled" : "Disabled"
       networkAcls = {
         defaultAction = "Deny"
         bypass        = "AzureServices"
