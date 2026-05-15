@@ -395,6 +395,8 @@ def _run_interactive(router: FoundryRouter) -> int:
 
 
 def main() -> int:
+    global COOLDOWN_SECS  # declarado antes de qualquer uso da variável
+
     parser = argparse.ArgumentParser(
         description="Azure AI Foundry Smart Router — validação e failover automático"
     )
@@ -421,7 +423,6 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    global COOLDOWN_SECS
     COOLDOWN_SECS = args.cooldown
 
     router = FoundryRouter(deployment=args.deployment)
